@@ -1,0 +1,114 @@
+﻿@model Profescipta.ViewModel.OrderViewModel
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div>
+        <label>Order No:</label>
+        @Html.TextBoxFor(m => m.SO_ORDER.ORDER_NO)
+    </div>
+    <div>
+        <label>Order Date:</label>
+        @Html.TextBoxFor(m => m.SO_ORDER.ORDER_DATE, "{0:yyyy-MM-dd}", new { type = "date" })
+    </div>
+    <div>
+        <label>Customer:</label>
+        @Html.DropDownListFor(m => m.SO_ORDER.COM_CUSTOMER_ID, new SelectList(ViewBag.Customers, "COM_CUSTOMER_ID", "CUSTOMER_NAME"))
+    </div>
+    <div>
+        <label>Address:</label>
+        @Html.TextBoxFor(m => m.SO_ORDER.ADDRESS)
+    </div>
+
+    <h3>Order Items</h3>
+    <table id="itemsTable">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.SO_ITEM.Count; i++)
+            {
+                <tr>
+                    <td>@Html.TextBoxFor(m => m.SO_ITEM[i].ITEM_NAME, new { @class = "form-control" })</td>
+                    <td>@Html.TextBoxFor(m => m.SO_ITEM[i].QUANTITY, new { @class = "form-control" })</td>
+                    <td>@Html.TextBoxFor(m => m.SO_ITEM[i].PRICE, new { @class = "form-control" })</td>
+                    <td><button type="button" class="btn btn-danger remove-item">Remove</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button type="button" id="addItemButton" class="btn btn-primary">Add Item</button>
+
+    <br />
+    <br />
+    <button type="submit" class="btn btn-success">Save</button>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+
+<script>
+        document.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent form from submitting automatically
+
+        const formData = new FormData(this);
+        formData.forEach(function(value, key) {
+            console.log(`${key}: ${value}`);
+        });
+
+        // Submit the form manually after logging data
+        this.submit();
+    });
+
+    document.getElementById('addItemButton').addEventListener('click', function () {
+        var tableBody = document.querySelector('#itemsTable tbody');
+        var rowCount = tableBody.rows.length;
+
+        var newRow = `
+            <tr>
+                <td>
+                    <input type="text" name="SO_ITEM[${rowCount}].ITEM_NAME" class="form-control" />
+                </td>
+                <td>
+                    <input type="number" name="SO_ITEM[${rowCount}].QUANTITY" class="form-control" />
+                </td>
+                <td>
+                    <input type="number" name="SO_ITEM[${rowCount}].PRICE" class="form-control" step="0.01" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger remove-item">Remove</button>
+                </td>
+            </tr>
+        `;
+
+        tableBody.insertAdjacentHTML('beforeend', newRow);
+    });
+
+    document.querySelector('#itemsTable').addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-item')) {
+            e.target.closest('tr').remove();
+        }
+    });
+
+
+</script>
